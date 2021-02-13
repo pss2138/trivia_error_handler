@@ -52,43 +52,174 @@ Setting the `FLASK_ENV` variable to `development` will detect file changes and r
 
 Setting the `FLASK_APP` variable to `flaskr` directs flask to use the `flaskr` directory and the `__init__.py` file to find the application. 
 
-## Tasks
+## API references
 
-One note before you delve into your tasks: for each endpoint you are expected to define the endpoint and response data. The frontend will be a plentiful resource because it is set up to expect certain endpoints and response data formats already. You should feel free to specify endpoints in your own way; if you do so, make sure to update the frontend or you will get some unexpected behavior. 
+### Getting Started
+- Base URL: '127.0.0.1:5000'
+- Authentication: This application does not require authentication.
 
-1. Use Flask-CORS to enable cross-domain requests and set response headers. 
-2. Create an endpoint to handle GET requests for questions, including pagination (every 10 questions). This endpoint should return a list of questions, number of total questions, current category, categories. 
-3. Create an endpoint to handle GET requests for all available categories. 
-4. Create an endpoint to DELETE question using a question ID. 
-5. Create an endpoint to POST a new question, which will require the question and answer text, category, and difficulty score. 
-6. Create a POST endpoint to get questions based on category. 
-7. Create a POST endpoint to get questions based on a search term. It should return any questions for whom the search term is a substring of the question. 
-8. Create a POST endpoint to get questions to play the quiz. This endpoint should take category and previous question parameters and return a random questions within the given category, if provided, and that is not one of the previous questions. 
-9. Create error handlers for all expected errors including 400, 404, 422 and 500. 
+### Errors
+The API will return three types of errors:
+- 400 - bad request
+- 404 - resource not found
+- 422 - unprocessable
+Example response:
+'''
+{
+    "success": False,
+    "error": 404,
+    "message": "resource not found"
+}
+'''
 
-REVIEW_COMMENT
-```
-This README is missing documentation of your endpoints. Below is an example for your endpoint to get all categories. Please use it as a reference for creating your documentation and resubmit your code. 
+### Endpoints
 
-Endpoints
-GET '/categories'
-GET ...
-POST ...
-DELETE ...
+#### GET /categories
+- Returns a dictionary of all available categories
+- Sample: 'curl http://127.0.0.1:5000/categories'
+Example response:
+'''
+  {
+      "categories": {
+          "1": "Science", 
+          "2": "Art", 
+          "3": "Geography", 
+          "4": "History", 
+          "5": "Entertainment", 
+          "6": "Sports"
+      }, 
+      "success": true
+  }
+'''
 
-GET '/categories'
-- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
-- Request Arguments: None
-- Returns: An object with a single key, categories, that contains a object of id: category_string key:value pairs. 
-{'1' : "Science",
-'2' : "Art",
-'3' : "Geography",
-'4' : "History",
-'5' : "Entertainment",
-'6' : "Sports"}
+#### GET /questions
+- Returns a paginated dictionary of questions of all available categories
+- Sample: 'curl http://127.0.0.1:5000/questions'
+Example Response:
+'''
+ "categories": {
+   "1": "Science", 
+   "2": "Art", 
+   "3": "Geography", 
+   "4": "History", 
+   "5": "Entertainment", 
+   "6": "Sports"
+ }, 
+ "current_category": null, 
+ "questions": [
+   {
+     "answer": "Maya Angelou", 
+     "category": 4, 
+     "difficulty": 2, 
+     "id": 5, 
+     "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+   },  
+   {
+     "answer": "Escher", 
+     "category": 2, 
+     "difficulty": 1, 
+     "id": 16, 
+     "question": "Which Dutch graphic artist\u2013initials M C was a creator of optical illusions?"
+   }
+ ], 
+ "success": true, 
+ "total_questions": 2
+}
+'''
 
-```
+#### DELETE /questions/<int:question_id>
+- Delete an existing questions from the repository of available questions
+- Sample: 'curl -X DELETE http://127.0.0.1:5000/questions/28'
+Example response:
+'''
+{
+  "deleted": "18", 
+  "success": true
+}
+'''
 
+
+#### POST /questions
+- Create a new question to the repository of available questions
+- Sample: 'curl http://127.0.0.1:5000/questions -X POST -H "Content-Type: application/json" -d '{ "question": "Do I like Winter more than Summer?", "answer": "Yes", "difficulty": 1, "category": "1" }''
+Example response:
+'''
+{
+  "created": 19, 
+  "success": true
+}
+'''
+
+#### POST /questions/search
+- Returns all questions having a substring matches with the input("searchTerm")
+- Sample: 'curl http://127.0.0.1:5000/questions/search -X POST -H "Content-Type: application/json" -d '{ "searchTerm": "summer"}''
+Example response:
+'''
+"question_num": 2,
+  "questions": [
+    {
+      "answer": "no",
+      "category": 2,
+      "difficulty": 1,
+      "id": 25,
+      "question": "Do you like Summer?"
+    },
+    {
+      "answer": "no",
+      "category": 2,
+      "difficulty": 1,
+      "id": 26,
+      "question": "Do you like Summer?"
+    }
+  ],
+  "success": true
+}
+'''
+
+#### GET /categories/<int:category_id>/questions
+- Returns a dictionary of questions for the specified category
+- Sample: 'curl http://127.0.0.1:5000/categories/1/questions'
+Example response:
+'''
+  "current_category": 1,
+  "current_category_name": "Science",
+  "question_num": 26,
+  "questions": [
+    {
+      "answer": "The Liver",
+      "category": 1,
+      "difficulty": 4,
+      "id": 20,
+      "question": "What is the heaviest organ in the human body?"
+    },
+    {
+      "answer": "Alexander Fleming",
+      "category": 1,
+      "difficulty": 3,
+      "id": 21,
+      "question": "Who discovered penicillin?"
+    }
+  ],
+  "success": true
+}
+'''
+
+#### POST /quizzes
+- Returns one random question within a specified category
+- Previously returned questions does not show again.
+- Sample: 'curl -X POST "http://127.0.0.1:5000/quizzes" -d "{\"quiz_category\":{\"type\": \"History\", \"id\": \"4\"},\"previous_questions\":[2]}" -H "Content-Type: application/json"'
+Example response:
+'''
+"question": {
+    "answer": "Maya Angelou",
+    "category": 4,
+    "difficulty": 2,
+    "id": 5,
+    "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+  },
+  "success": true
+}
+'''
 
 ## Testing
 To run the tests, run
